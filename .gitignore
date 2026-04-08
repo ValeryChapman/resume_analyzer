@@ -1,0 +1,17 @@
+# Environment
+.env
+
+# Coding spaces
+.idea
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Virtual environments
+.venv/
+
+# Tool caches
+.ruff_cache/

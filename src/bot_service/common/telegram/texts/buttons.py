@@ -6,4 +6,6 @@ class ButtonText(StrEnum):
     START = "Главное меню"
 
     ADD_VACANCY = "Добавить вакансию"
-    GET_VACANCIES = "📋 Мои вакансии"
+    GET_VACANCIES = "📄 Мои вакансии"
+    PAGINATION_BACK = "<––"
+    PAGINATION_NEXT = "––>"

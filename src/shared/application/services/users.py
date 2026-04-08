@@ -25,7 +25,7 @@ async def create_user_service(
         postgres_session=postgres_session, telegram_id=telegram_id
     )
     if not user:
-        raise UserNotFoundError(f"User with Telegram ID {telegram_id} was not found")
+        raise UserNotFoundError(f"Пользователь с Telegram ID {telegram_id} не найден")
 
     return user
 
@@ -42,7 +42,7 @@ async def get_user_by_id_service(postgres_session: AsyncSession, user_id: UUID) 
         postgres_session=postgres_session, user_id=user_id
     )
     if not user:
-        raise UserNotFoundError(f"User with ID {user_id} was not found")
+        raise UserNotFoundError(f"Пользователь с идентификатором {user_id} не найден")
 
     return user
 
@@ -61,6 +61,6 @@ async def get_user_by_telegram_id_service(
         postgres_session=postgres_session, telegram_id=telegram_id
     )
     if not user:
-        raise UserNotFoundError(f"User with Telegram ID {telegram_id} was not found")
+        raise UserNotFoundError(f"Пользователь с Telegram ID {telegram_id} не найден")
 
     return user

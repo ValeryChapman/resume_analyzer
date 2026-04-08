@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot_service.common.telegram.callbacks import Callbacks
+from bot_service.common.telegram.callbacks import Callbacks, VacanciesCallback
 from bot_service.common.telegram.texts.buttons import ButtonText
 
 
@@ -9,10 +9,12 @@ def start_menu_keyboard() -> InlineKeyboardMarkup:
     keyboard.inline_keyboard.append(
         [
             InlineKeyboardButton(
-                text=ButtonText.ADD_VACANCY, callback_data=Callbacks.ADD_VACANCY
+                text=ButtonText.ADD_VACANCY,
+                callback_data=Callbacks.ADD_VACANCY,
             ),
             InlineKeyboardButton(
-                text=ButtonText.GET_VACANCIES, callback_data=Callbacks.GET_VACANCIES
+                text=ButtonText.GET_VACANCIES,
+                callback_data=VacanciesCallback(page=1).pack(),
             ),
         ]
     )

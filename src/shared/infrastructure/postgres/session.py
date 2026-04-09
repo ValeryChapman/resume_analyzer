@@ -1,6 +1,7 @@
 import logging
 from asyncio import current_task
 from contextlib import asynccontextmanager
+from importlib import import_module
 from typing import Any, AsyncGenerator, Optional
 
 from sqlalchemy.exc import DBAPIError
@@ -46,6 +47,10 @@ def init_postgres_session_factory(url: str, echo: bool = False) -> async_scoped_
 
     if _postgres_async_session_factory is None:
         logger.info("Инициализация фабрики асинхронных сессий SQLAlchemy...")
+
+        # Гарантируем регистрацию всех ORM-моделей до первых запросов.
+        import_module("shared.infrastructure.postgres.models")
+
         engine: AsyncEngine = init_postgres_engine(url=url, echo=echo)
         _postgres_async_session_factory = async_scoped_session(
             async_sessionmaker(

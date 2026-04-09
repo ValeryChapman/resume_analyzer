@@ -8,12 +8,17 @@ from shared.domain.exceptions.vacancies import (
     VacancyNotFoundError,
     VacancyValidationError,
 )
-from shared.infrastructure.postgres.models.vacancy import Vacancy
+from shared.infrastructure.postgres.models.vacancy import (
+    Vacancy,
+    VacancyProcessingStatus,
+)
 from shared.repositories.vacancies import (
     create_vacancy_repository,
+    delete_vacancy_by_id_repository,
     get_vacancies_by_user_id_repository,
     get_vacancies_count_by_user_id_repository,
     get_vacancy_by_id_repository,
+    update_vacancy_processing_status_repository,
 )
 
 MIN_VACANCY_TEXT_LENGTH = 100
@@ -120,3 +125,82 @@ async def get_vacancy_by_id_service(
         )
 
     return vacancy
+
+
+async def get_vacancy_by_id_for_processing_service(
+    postgres_session: AsyncSession,
+    vacancy_id: UUID,
+) -> Vacancy:
+    """
+    Получает вакансию по идентификатору для внутренней обработки сервисами.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param vacancy_id: Идентификатор вакансии.
+    :return: Объект Vacancy.
+    """
+    vacancy = await get_vacancy_by_id_repository(
+        postgres_session=postgres_session,
+        vacancy_id=vacancy_id,
+    )
+    if vacancy is None:
+        raise VacancyNotFoundError(
+            f"Вакансия с идентификатором {vacancy_id} не найдена"
+        )
+
+    return vacancy
+
+
+async def update_vacancy_processing_status_service(
+    postgres_session: AsyncSession,
+    vacancy_id: UUID,
+    processing_status: VacancyProcessingStatus,
+    processed_data: dict | None = None,
+    update_processed_data: bool = False,
+) -> Vacancy:
+    """
+    Обновляет статус обработки вакансии.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param vacancy_id: Идентификатор вакансии.
+    :param processing_status: Новый статус обработки вакансии.
+    :param processed_data: Данные после обработки.
+    :param update_processed_data: Обновлять ли поле processed_data.
+    :return: Обновленная вакансия.
+    """
+    vacancy = await update_vacancy_processing_status_repository(
+        postgres_session=postgres_session,
+        vacancy_id=vacancy_id,
+        processing_status=processing_status,
+        processed_data=processed_data,
+        update_processed_data=update_processed_data,
+    )
+    if vacancy is None:
+        raise VacancyNotFoundError(
+            f"Вакансия с идентификатором {vacancy_id} не найдена"
+        )
+
+    return vacancy
+
+
+async def delete_vacancy_by_id_service(
+    postgres_session: AsyncSession,
+    vacancy_id: UUID,
+    user_id: UUID,
+) -> None:
+    """
+    Удаляет вакансию по идентификатору с проверкой владельца.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param vacancy_id: Идентификатор вакансии.
+    :param user_id: Идентификатор пользователя-владельца.
+    :raises VacancyNotFoundError: Если вакансия не найдена.
+    """
+    is_deleted = await delete_vacancy_by_id_repository(
+        postgres_session=postgres_session,
+        vacancy_id=vacancy_id,
+        user_id=user_id,
+    )
+    if not is_deleted:
+        raise VacancyNotFoundError(
+            f"Вакансия с идентификатором {vacancy_id} не найдена"
+        )

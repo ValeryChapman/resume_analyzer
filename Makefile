@@ -14,7 +14,7 @@ DOCKER_COMPOSE_PROD=docker compose -f $(DOCKER_COMPOSE_PROD_PATH) --env-file $(E
 	app-up app-start app-start-d app-down \
 	prod-up prod-start prod-start-d prod-down \
 	migrate-up migrate-down migrate-revision \
-	sync-bot sync-migration
+	sync-migration sync-bot sync-vacancy-processing
 
 build: build-infra
 
@@ -80,8 +80,11 @@ migrate-down:
 migrate-revision:
 	PYTHONPATH=src UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv run --project src/migration_service --no-sync alembic -c src/migration_service/alembic.ini revision --autogenerate -m "$(m)"
 
+sync-migration:
+	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/migration_service --inexact
+
 sync-bot:
 	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/bot_service --inexact
 
-sync-migration:
-	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/migration_service --inexact
+sync-vacancy-processing:
+	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/vacancy_processing_service --inexact

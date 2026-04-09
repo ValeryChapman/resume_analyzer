@@ -16,3 +16,7 @@ class VacanciesCallback(CallbackData, prefix="vacancies_page"):
 
 class VacancyCallback(CallbackData, prefix="vacancy"):
     id: UUID
+
+
+class VacancyDeleteCallback(CallbackData, prefix="vacancy_delete"):
+    id: UUID

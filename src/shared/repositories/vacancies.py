@@ -1,12 +1,15 @@
 from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.infrastructure.postgres.models.vacancy import Vacancy
+from shared.infrastructure.postgres.models.vacancy import (
+    Vacancy,
+    VacancyProcessingStatus,
+)
 
 
 async def create_vacancy_repository(
@@ -71,19 +74,72 @@ async def get_vacancies_count_by_user_id_repository(
 
 
 async def get_vacancy_by_id_repository(
-    postgres_session: AsyncSession, vacancy_id: UUID, user_id: UUID
+    postgres_session: AsyncSession, vacancy_id: UUID, user_id: UUID | None = None
 ) -> Vacancy | None:
     """
-    Получает вакансию по идентификатору с проверкой владельца.
+    Получает вакансию по идентификатору.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param vacancy_id: Идентификатор вакансии.
+    :param user_id: Идентификатор пользователя-владельца (опционально).
+    :return: Объект Vacancy или None.
+    """
+    statement = select(Vacancy).where(Vacancy.id == vacancy_id)
+    if user_id is not None:
+        statement = statement.where(Vacancy.user_id == user_id)
+
+    result: Result = await postgres_session.execute(statement=statement)
+    return result.scalar_one_or_none()
+
+
+async def update_vacancy_processing_status_repository(
+    postgres_session: AsyncSession,
+    vacancy_id: UUID,
+    processing_status: VacancyProcessingStatus,
+    processed_data: dict | None = None,
+    update_processed_data: bool = False,
+) -> Vacancy | None:
+    """
+    Обновляет статус обработки вакансии.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param vacancy_id: Идентификатор вакансии.
+    :param processing_status: Новый статус обработки.
+    :param processed_data: Данные после обработки.
+    :param update_processed_data: Обновлять ли поле processed_data.
+    :return: Обновленная вакансия или None.
+    """
+    values: dict[str, object] = {"processing_status": processing_status}
+    if update_processed_data:
+        values["processed_data"] = processed_data
+
+    statement = (
+        update(Vacancy)
+        .where(Vacancy.id == vacancy_id)
+        .values(**values)
+        .returning(Vacancy)
+    )
+    result: Result = await postgres_session.execute(statement=statement)
+    return result.scalar_one_or_none()
+
+
+async def delete_vacancy_by_id_repository(
+    postgres_session: AsyncSession,
+    vacancy_id: UUID,
+    user_id: UUID,
+) -> bool:
+    """
+    Удаляет вакансию по идентификатору с проверкой владельца.
 
     :param postgres_session: Асинхронная сессия SQLAlchemy.
     :param vacancy_id: Идентификатор вакансии.
     :param user_id: Идентификатор пользователя-владельца.
-    :return: Объект Vacancy или None.
+    :return: True, если вакансия удалена, иначе False.
     """
-    statement = select(Vacancy).where(
-        Vacancy.id == vacancy_id,
-        Vacancy.user_id == user_id,
+    statement = (
+        delete(Vacancy)
+        .where(Vacancy.id == vacancy_id, Vacancy.user_id == user_id)
+        .returning(Vacancy.id)
     )
     result: Result = await postgres_session.execute(statement=statement)
-    return result.scalar_one_or_none()
+    return result.scalar_one_or_none() is not None

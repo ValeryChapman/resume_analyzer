@@ -1,0 +1,22 @@
+[project]
+name = "vacancy_processing_service"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic (==2.12.5)",
+    "pydantic-settings (==2.13.1)",
+    "SQLAlchemy (==2.0.48)",
+    "psycopg2-binary (==2.9.11)",
+    "asyncpg (==0.31.0)",
+    "redis (==7.3.0)",
+    "greenlet (==3.3.2)",
+    "orjson (==3.11.8)",
+    "openai (==2.31.0)",
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

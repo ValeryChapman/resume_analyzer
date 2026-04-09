@@ -8,9 +8,11 @@ from aiogram.fsm.storage.redis import RedisStorage
 from redis import asyncio as aioredis
 
 from bot_service.controllers.telegram import telegram_router
-from bot_service.controllers.telegram.middlewares import EnsureTelegramUserMiddleware
 from bot_service.controllers.telegram.middlewares.database import (
     DatabaseSessionMiddleware,
+)
+from bot_service.controllers.telegram.middlewares.users import (
+    EnsureTelegramUserMiddleware,
 )
 from shared.infrastructure.redis.client import get_redis_client
 from shared.infrastructure.telegram_bot import (
@@ -26,7 +28,7 @@ async def _build_fsm_storage() -> BaseStorage:
         return RedisStorage(redis=redis_client)
     except Exception as exc:
         logger.warning(
-            "Redis unavailable for FSM storage, fallback to in-memory storage: %s",
+            "Redis недоступен для FSM-хранилища, используем in-memory storage: %s",
             exc,
             exc_info=True,
         )

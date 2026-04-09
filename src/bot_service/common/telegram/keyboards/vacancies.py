@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from uuid import UUID
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -6,6 +7,7 @@ from bot_service.common.telegram.callbacks import (
     Callbacks,
     VacanciesCallback,
     VacancyCallback,
+    VacancyDeleteCallback,
 )
 from bot_service.common.telegram.keyboards.pagination import pagination_buttons
 from bot_service.common.telegram.texts.buttons import ButtonText
@@ -64,13 +66,32 @@ def vacancies_list_pagination_keyboard(
     return keyboard
 
 
-def vacancy_details_keyboard() -> InlineKeyboardMarkup:
+def vacancy_details_keyboard(vacancy_id: UUID) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
+                    text=ButtonText.DELETE_VACANCY,
+                    callback_data=VacancyDeleteCallback(id=vacancy_id).pack(),
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text=ButtonText.BACK,
                     callback_data=VacanciesCallback(page=1).pack(),
+                ),
+            ],
+        ]
+    )
+
+
+def vacancy_deleted_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=ButtonText.START,
+                    callback_data=Callbacks.START,
                 ),
             ]
         ]

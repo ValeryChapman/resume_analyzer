@@ -8,5 +8,3 @@ from bot_service.controllers.telegram.handlers.vacancies import (
 router = Router(name="main")
 router.include_router(start_router)
 router.include_router(vacancies_router)
-
-__all__ = ["router"]

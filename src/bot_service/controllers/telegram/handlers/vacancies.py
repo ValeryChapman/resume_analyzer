@@ -10,10 +10,12 @@ from bot_service.common.telegram.callbacks import (
     Callbacks,
     VacanciesCallback,
     VacancyCallback,
+    VacancyDeleteCallback,
 )
 from bot_service.common.telegram.keyboards.vacancies import (
     add_vacancy_keyboard,
     vacancies_list_pagination_keyboard,
+    vacancy_deleted_keyboard,
     vacancy_details_keyboard,
 )
 from bot_service.common.telegram.states import AddVacancyState
@@ -24,12 +26,15 @@ from bot_service.common.telegram.texts.messages.vacancies import (
     vacancies_list_message,
     vacancies_not_found_message,
     vacancy_created_message,
+    vacancy_deleted_message,
     vacancy_details_message,
     vacancy_not_found_message,
 )
 from bot_service.common.tools.pagination import get_limit_and_offset_by_page
+from shared.application.services.tasks import send_vacancy_processing_task_service
 from shared.application.services.vacancies import (
     create_vacancy_service,
+    delete_vacancy_by_id_service,
     get_vacancies_by_user_id_service,
     get_vacancies_count_by_user_id_service,
     get_vacancy_by_id_service,
@@ -39,6 +44,7 @@ from shared.domain.exceptions.vacancies import (
     VacancyValidationError,
 )
 from shared.infrastructure.postgres.models.user import User
+from shared.infrastructure.postgres.models.vacancy import Vacancy
 
 router = Router(name="vacancies_handlers_router")
 
@@ -117,8 +123,34 @@ async def callback_get_vacancy_handler(
     if callback.message is not None:
         await callback.message.edit_text(
             text=vacancy_details_message(vacancy=vacancy),
-            reply_markup=vacancy_details_keyboard(),
+            reply_markup=vacancy_details_keyboard(vacancy_id=vacancy.id),
         )
+    await callback.answer()
+
+
+@router.callback_query(VacancyDeleteCallback.filter())
+async def callback_delete_vacancy_handler(
+    callback: CallbackQuery,
+    callback_data: VacancyDeleteCallback,
+    db_user: User,
+    postgres_session: AsyncSession,
+) -> None:
+    try:
+        await delete_vacancy_by_id_service(
+            postgres_session=postgres_session,
+            vacancy_id=callback_data.id,
+            user_id=db_user.id,
+        )
+    except VacancyNotFoundError:
+        await callback.answer(vacancy_not_found_message(), show_alert=True)
+        return
+
+    if callback.message is not None:
+        with suppress(TelegramBadRequest):
+            await callback.message.edit_text(
+                text=vacancy_deleted_message(),
+                reply_markup=vacancy_deleted_keyboard(),
+            )
     await callback.answer()
 
 
@@ -130,11 +162,14 @@ async def message_add_vacancy_handler(
     postgres_session: AsyncSession,
 ) -> None:
     try:
-        await create_vacancy_service(
+        vacancy: Vacancy = await create_vacancy_service(
             postgres_session=postgres_session,
             user_id=db_user.id,
             raw_text=message.text or "",
         )
+        # Фиксируем вакансию в БД до публикации события в Redis Streams.
+        await postgres_session.commit()
+        await send_vacancy_processing_task_service(vacancy_id=vacancy.id)
     except VacancyValidationError as exc:
         await message.answer(
             text=add_vacancy_validation_message(str(exc)),

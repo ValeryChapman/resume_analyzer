@@ -46,7 +46,6 @@ services:
 
   migration_service:
     profiles: [ "platform" ]
-    hostname: ${MIGRATION_SERVICE_HOST}
     restart: "no"
     build:
       context: ../../

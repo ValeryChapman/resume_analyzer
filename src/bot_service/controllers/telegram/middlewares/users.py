@@ -4,7 +4,7 @@ from typing import Any
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from shared.application.services.users import create_user_service
+from shared.services.users import create_user_service
 
 
 class EnsureTelegramUserMiddleware(BaseMiddleware):

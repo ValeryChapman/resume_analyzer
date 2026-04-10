@@ -4,11 +4,11 @@ from asyncio import Task
 
 from redis import asyncio as aioredis
 
-from shared.application.services.redis_streams import (
+from shared.domain.constants.tasks import RedisStreamName
+from shared.services.redis_streams import (
     claim_stale_messages_service,
     create_consumer_group_service,
 )
-from shared.domain.constants.tasks import RedisStreamName
 from vacancy_processing_service.services.vacancies import _process_vacancy_task
 from vacancy_processing_service.settings import settings
 

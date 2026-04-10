@@ -4,19 +4,19 @@ from collections.abc import Mapping
 from pydantic import ValidationError
 from redis import asyncio as aioredis
 
-from shared.application.services.redis_streams import (
-    ack_and_delete_message_service,
-    get_message_delivery_count_service,
-)
-from shared.application.services.vacancies import (
-    get_vacancy_by_id_for_processing_service,
-    update_vacancy_processing_status_service,
-)
 from shared.domain.constants.tasks import RedisStreamName
 from shared.domain.dto.tasks import VacancyProcessingTaskSchema
 from shared.domain.exceptions.vacancies import VacancyNotFoundError
 from shared.infrastructure.postgres.models.vacancy import VacancyProcessingStatus
 from shared.infrastructure.postgres.session import get_postgres_async_session
+from shared.services.redis_streams import (
+    ack_and_delete_message_service,
+    get_message_delivery_count_service,
+)
+from shared.services.vacancies import (
+    get_vacancy_by_id_for_processing_service,
+    update_vacancy_processing_status_service,
+)
 from vacancy_processing_service.services.llm import structure_vacancy_text_service
 from vacancy_processing_service.settings import settings
 
@@ -107,8 +107,6 @@ async def _process_vacancy_task(
             f"Вакансия для обработки не найдена: message_id={message_id} error={exc}",
             exc_info=True,
         )
-        # Не подтверждаем сообщение сразу: это может быть гонка транзакций.
-        # Сообщение останется в pending и будет поднято повторно.
         if delivery_count >= settings.vacancy_processing.max_delivery_attempts:
             logger.error(
                 "Вакансия не найдена после максимального числа попыток, удаляем задачу: "

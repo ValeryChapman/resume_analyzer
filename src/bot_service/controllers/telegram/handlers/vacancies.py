@@ -31,20 +31,20 @@ from bot_service.common.telegram.texts.messages.vacancies import (
     vacancy_not_found_message,
 )
 from bot_service.common.tools.pagination import get_limit_and_offset_by_page
-from shared.application.services.tasks import send_vacancy_processing_task_service
-from shared.application.services.vacancies import (
-    create_vacancy_service,
-    delete_vacancy_by_id_service,
-    get_vacancies_by_user_id_service,
-    get_vacancies_count_by_user_id_service,
-    get_vacancy_by_id_service,
-)
 from shared.domain.exceptions.vacancies import (
     VacancyNotFoundError,
     VacancyValidationError,
 )
 from shared.infrastructure.postgres.models.user import User
 from shared.infrastructure.postgres.models.vacancy import Vacancy
+from shared.services.tasks import send_vacancy_processing_task_service
+from shared.services.vacancies import (
+    create_vacancy_service,
+    delete_vacancy_by_id_service,
+    get_vacancies_by_user_id_service,
+    get_vacancies_count_by_user_id_service,
+    get_vacancy_by_id_service,
+)
 
 router = Router(name="vacancies_handlers_router")
 

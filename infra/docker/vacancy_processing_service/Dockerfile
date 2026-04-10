@@ -40,13 +40,10 @@ COPY src/shared/infrastructure/postgres/models /src/shared/infrastructure/postgr
 ## infrastructure –> ollama
 COPY src/shared/infrastructure/ollama /src/shared/infrastructure/ollama
 
-## application
-COPY src/shared/application/__init__.py /src/shared/application/__init__.py
-
-## application –> services
-COPY src/shared/application/services/__init__.py /src/shared/application/services/__init__.py
-COPY src/shared/application/services/redis_streams.py /src/shared/application/services/redis_streams.py
-COPY src/shared/application/services/vacancies.py /src/shared/application/services/vacancies.py
+## services
+COPY src/shared/services/__init__.py /src/shared/services/__init__.py
+COPY src/shared/services/redis_streams.py /src/shared/services/redis_streams.py
+COPY src/shared/services/vacancies.py /src/shared/services/vacancies.py
 
 ## repositories
 COPY src/shared/repositories/__init__.py /src/shared/repositories/__init__.py

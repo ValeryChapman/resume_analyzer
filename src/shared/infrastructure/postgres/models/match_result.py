@@ -12,17 +12,13 @@ class MatchResult(BaseModel):
     __tablename__ = "match_results"
     __table_args__ = (
         UniqueConstraint(
-            "vacancy_id",
-            "resume_id",
-            name="uq_match_results_vacancy_resume",
+            "vacancy_id", "resume_id", name="uq_match_results_vacancy_resume"
         ),
         {"schema": "public"},
     )
 
     id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4,
+        PG_UUID(as_uuid=True), primary_key=True, default=uuid4
     )
     vacancy_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -34,18 +30,10 @@ class MatchResult(BaseModel):
         ForeignKey("public.resumes.id", ondelete="CASCADE"),
         nullable=False,
     )
-    score: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-    reasoning: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-    )
+    score: Mapped[float] = mapped_column(Float, nullable=False)
+    reasoning: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

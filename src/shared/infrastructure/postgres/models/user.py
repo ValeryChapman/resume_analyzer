@@ -22,15 +22,11 @@ class User(BaseModel):
     __table_args__ = {"schema": "public"}
 
     id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4,
+        PG_UUID(as_uuid=True), primary_key=True, default=uuid4
     )
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

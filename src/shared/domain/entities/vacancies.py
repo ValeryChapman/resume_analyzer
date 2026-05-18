@@ -1,14 +1,6 @@
-from __future__ import annotations
-
 from enum import Enum
 
 from pydantic import BaseModel, Field
-
-
-class EducationLevel(str, Enum):
-    SECONDARY = "secondary"
-    HIGHER = "higher"
-    UNKNOWN = "unknown"
 
 
 class SeniorityLevel(str, Enum):
@@ -18,21 +10,33 @@ class SeniorityLevel(str, Enum):
     UNKNOWN = "unknown"
 
 
+class EducationLevel(str, Enum):
+    SECONDARY = "secondary"
+    HIGHER = "higher"
+    UNKNOWN = "unknown"
+
+
 class VacancyStructuredData(BaseModel):
-    title: str | None = Field(default=None, description="Название должности.")
-    seniority: SeniorityLevel = Field(
-        default=SeniorityLevel.UNKNOWN, description="Уровень позиции."
+    """Модель структурированных данных вакансии, извлеченных из текста."""
+
+    title: str = Field(
+        ..., description="Название должности из текста, например Python разработчик."
     )
-    experience: float | None = Field(
+    seniority: SeniorityLevel | None = Field(
+        default=None, description="Уровень позиции."
+    )
+    experience: int | None = Field(
         default=None,
-        description="Минимальный опыт работы в годах.",
+        description="Минимальный опыт работы в годах, если указан явно, иначе null.",
     )
     skills: list[str] = Field(
-        default_factory=list,
-        description="Список ключевых навыков и технологий.",
+        ...,
+        description="Список явно указанных профессиональных навыков, компетенций, программного обеспечения, оборудования или методологий.",
     )
-    education: EducationLevel = Field(
-        default=EducationLevel.UNKNOWN,
-        description="Минимальный требуемый уровень образования.",
+    education: EducationLevel | None = Field(
+        default=None, description="Требуемый уровень образования."
     )
-    short_summary: str = Field(description="Краткая сводка вакансии.")
+    summary: str = Field(
+        ...,
+        description="Одно короткое предложение на русском с кратким описанием вакансии.",
+    )

@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
+from shared.infrastructure.llm.client import init_llm_async_client
 from shared.infrastructure.logger.setup import setup_logging
-from shared.infrastructure.ollama.client import init_ollama_async_client
 from shared.infrastructure.postgres.session import init_postgres_session_factory
 from shared.infrastructure.redis.client import close_redis_client, init_redis_client
 from vacancy_processing_service.background import (
@@ -22,10 +22,10 @@ async def main() -> None:
     await init_redis_client(url=settings.redis.url)
 
     # Инициализация асинхронного Ollama клиента.
-    init_ollama_async_client(
-        base_url=settings.ollama.base_url,
-        api_key=settings.ollama.api_key,
-        timeout=settings.ollama.timeout,
+    init_llm_async_client(
+        base_url=settings.llm.base_url,
+        api_key=settings.llm.api_key,
+        timeout=settings.llm.timeout,
     )
 
     tasks = [

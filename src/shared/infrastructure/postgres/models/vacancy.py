@@ -35,6 +35,8 @@ class Vacancy(BaseModel):
         nullable=False,
     )
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
+    title: Mapped[str | None] = mapped_column(Text, nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     processing_status: Mapped[VacancyProcessingStatus] = mapped_column(
         SQLEnum(VacancyProcessingStatus, name="vacancy_processing_status"),
         nullable=False,

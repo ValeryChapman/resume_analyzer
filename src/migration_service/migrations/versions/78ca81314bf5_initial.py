@@ -83,6 +83,8 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("raw_text", sa.Text(), nullable=False),
+        sa.Column("title", sa.Text(), nullable=True),
+        sa.Column("summary", sa.Text(), nullable=True),
         sa.Column(
             "processing_status",
             sa.Enum(

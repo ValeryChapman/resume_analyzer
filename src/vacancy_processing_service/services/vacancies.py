@@ -6,6 +6,7 @@ from redis import asyncio as aioredis
 
 from shared.domain.constants.tasks import RedisStreamName
 from shared.domain.dto.tasks import VacancyProcessingTaskSchema
+from shared.domain.entities.vacancies import VacancyStructuredData
 from shared.domain.exceptions.vacancies import VacancyNotFoundError
 from shared.infrastructure.postgres.models.vacancy import VacancyProcessingStatus
 from shared.infrastructure.postgres.session import get_postgres_async_session
@@ -81,8 +82,8 @@ async def _process_vacancy_task(
                 processing_status=VacancyProcessingStatus.processing,
             )
 
-        structured_vacancy_data = await structure_vacancy_text_service(
-            raw_text=vacancy.raw_text
+        structured_vacancy_data: VacancyStructuredData = (
+            await structure_vacancy_text_service(raw_text=vacancy.raw_text)
         )
 
         async with get_postgres_async_session() as postgres_session:
@@ -91,6 +92,8 @@ async def _process_vacancy_task(
                 vacancy_id=task.vacancy_id,
                 processing_status=VacancyProcessingStatus.completed,
                 processed_data=structured_vacancy_data.model_dump(mode="json"),
+                title=structured_vacancy_data.title,
+                summary=structured_vacancy_data.summary,
                 update_processed_data=True,
             )
 

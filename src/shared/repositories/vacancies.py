@@ -97,6 +97,8 @@ async def update_vacancy_processing_status_repository(
     vacancy_id: UUID,
     processing_status: VacancyProcessingStatus,
     processed_data: dict | None = None,
+    title: str | None = None,
+    summary: str | None = None,
     update_processed_data: bool = False,
 ) -> Vacancy | None:
     """
@@ -106,12 +108,18 @@ async def update_vacancy_processing_status_repository(
     :param vacancy_id: Идентификатор вакансии.
     :param processing_status: Новый статус обработки.
     :param processed_data: Данные после обработки.
+    :param title: Извлеченный заголовок вакансии.
+    :param summary: Извлеченная краткая сводка вакансии.
     :param update_processed_data: Обновлять ли поле processed_data.
     :return: Обновленная вакансия или None.
     """
     values: dict[str, object] = {"processing_status": processing_status}
     if update_processed_data:
         values["processed_data"] = processed_data
+    if title is not None:
+        values["title"] = title
+    if summary is not None:
+        values["summary"] = summary
 
     statement = (
         update(Vacancy)

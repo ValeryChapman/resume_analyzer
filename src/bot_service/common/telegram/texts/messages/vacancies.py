@@ -52,7 +52,11 @@ def vacancies_empty_message() -> str:
 
 
 def vacancy_button_text(vacancy: Vacancy) -> str:
-    preview = _truncate_text(" ".join(vacancy.raw_text.split()), max_length=60)
+    vacancy_text = vacancy.raw_text
+    if vacancy.title:
+        vacancy_text = vacancy.title
+
+    preview = _truncate_text(" ".join(vacancy_text.split()), max_length=60)
     return f"{_vacancy_status_emoji(vacancy.processing_status)} {preview}"
 
 
@@ -88,10 +92,19 @@ def _truncate_text(text: str, max_length: int) -> str:
 
 
 def vacancy_details_message(vacancy: Vacancy) -> str:
+    description = vacancy.raw_text
+    if vacancy.summary:
+        description = vacancy.summary
+
+    name_block = ""
+    if vacancy.title:
+        name_block = f"Название: <b>{vacancy.title}</b>\n"
+
     return (
         "📄 <b>Вакансия</b>\n\n"
+        f"{name_block}"
         f"Статус обработки: <b>{_vacancy_status_ru(vacancy.processing_status)}</b>\n"
         f"Создана: <b>{format_datetime_moscow(vacancy.created_at)}</b>\n\n"
         "<b>Описание:</b>\n"
-        f"<blockquote>{escape(vacancy.raw_text)}</blockquote>"
+        f"<blockquote>{escape(description)}</blockquote>"
     )

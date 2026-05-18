@@ -64,17 +64,17 @@ class RedisConfig(BaseSettings):
         return f"redis://{credentials}{self.host}:{self.port}/{self.db}"
 
 
-class OllamaConfig(BaseSettings):
-    """Конфигурация Ollama клиента."""
+class LLMConfig(BaseSettings):
+    """Конфигурация для работы с LLM."""
 
     model_config = SettingsConfigDict(
         env_file=DOTENV, env_file_encoding="utf-8", extra="ignore"
     )
 
-    base_url: str = Field("http://localhost:11434/v1", alias="OLLAMA_BASE_URL")
-    api_key: str = Field("ollama", alias="OLLAMA_API_KEY")
-    timeout: int = Field(120, alias="OLLAMA_TIMEOUT")
-    llm_name: str = Field("gpt-oss:20b", alias="OLLAMA_LARGE_LANGUAGE_MODEL_NAME")
+    name: str = Field("...", alias="LLM_NAME")
+    base_url: str = Field("https://...", alias="LLM_BASE_URL")
+    api_key: str = Field("...", alias="LLM_API_KEY")
+    timeout: int = Field(30, alias="LLM_TIMEOUT")
 
 
 class VacancyProcessingConfig(BaseSettings):
@@ -125,7 +125,7 @@ class ServiceConfig(BaseSettings):
     # Вложенные блоки конфигурации для отдельных компонентов
     postgres: PostgresConfig = PostgresConfig()
     redis: RedisConfig = RedisConfig()
-    ollama: OllamaConfig = OllamaConfig()
+    llm: LLMConfig = LLMConfig()
     vacancy_processing: VacancyProcessingConfig = VacancyProcessingConfig()
 
 

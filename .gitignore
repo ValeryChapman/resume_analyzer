@@ -16,3 +16,6 @@ __pycache__/
 # Tool caches
 .ruff_cache/
 .uv-cache/
+
+# Data
+/data

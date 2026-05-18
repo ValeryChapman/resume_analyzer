@@ -37,8 +37,8 @@ COPY src/shared/infrastructure/postgres/session.py /src/shared/infrastructure/po
 ## infrastructure –> postgres –> models
 COPY src/shared/infrastructure/postgres/models /src/shared/infrastructure/postgres/models
 
-## infrastructure –> ollama
-COPY src/shared/infrastructure/ollama /src/shared/infrastructure/ollama
+## infrastructure –> llm
+COPY src/shared/infrastructure/llm /src/shared/infrastructure/llm
 
 ## services
 COPY src/shared/services/__init__.py /src/shared/services/__init__.py

@@ -7,3 +7,9 @@ class VacancyProcessingTaskSchema(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     vacancy_id: UUID
+
+
+class ResumeProcessingTaskSchema(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    resume_id: UUID

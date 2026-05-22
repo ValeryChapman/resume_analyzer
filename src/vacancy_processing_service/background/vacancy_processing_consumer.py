@@ -27,5 +27,3 @@ async def run_vacancy_processing_consumer_background_task() -> None:
             "Фоновая задача Vacancy Processing Consumer завершилась с ошибкой"
         )
         raise
-    finally:
-        ...

@@ -13,7 +13,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from shared.infrastructure.postgres.models.base import BaseModel
 
 if TYPE_CHECKING:
-    from shared.infrastructure.postgres.models.resume import Resume
     from shared.infrastructure.postgres.models.vacancy import Vacancy
 
 
@@ -37,12 +36,6 @@ class User(BaseModel):
 
     vacancies: Mapped[List["Vacancy"]] = relationship(
         "Vacancy",
-        back_populates="user",
-        cascade="all, delete-orphan",
-        passive_deletes=True,
-    )
-    resumes: Mapped[List["Resume"]] = relationship(
-        "Resume",
         back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,

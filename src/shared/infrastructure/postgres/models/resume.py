@@ -1,18 +1,14 @@
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Text, func, text
+from sqlalchemy import DateTime, Text, func, text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from shared.infrastructure.postgres.models.base import BaseModel
-
-if TYPE_CHECKING:
-    from shared.infrastructure.postgres.models.user import User
 
 
 class ResumeProcessingStatus(str, Enum):
@@ -29,12 +25,10 @@ class Resume(BaseModel):
     id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, default=uuid4
     )
-    user_id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        ForeignKey("public.users.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    hh_id: Mapped[str | None] = mapped_column(Text, unique=True, nullable=True)
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     processing_status: Mapped[ResumeProcessingStatus] = mapped_column(
         SQLEnum(ResumeProcessingStatus, name="resume_processing_status"),
         nullable=False,
@@ -51,8 +45,6 @@ class Resume(BaseModel):
         server_default=func.now(),
         onupdate=func.now(),
     )
-
-    user: Mapped["User"] = relationship("User", back_populates="resumes")
 
     def __repr__(self):
         return f"<Resume(id={self.id}, user_id={self.user_id}, status={self.processing_status})>"

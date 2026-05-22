@@ -15,6 +15,7 @@ from shared.infrastructure.postgres.models.vacancy import (
 from shared.repositories.vacancies import (
     create_vacancy_repository,
     delete_vacancy_by_id_repository,
+    get_all_completed_vacancies_repository,
     get_vacancies_by_user_id_repository,
     get_vacancies_count_by_user_id_repository,
     get_vacancy_by_id_repository,
@@ -210,3 +211,17 @@ async def delete_vacancy_by_id_service(
         raise VacancyNotFoundError(
             f"Вакансия с идентификатором {vacancy_id} не найдена"
         )
+
+
+async def get_all_completed_vacancies_service(
+    postgres_session: AsyncSession,
+) -> Sequence[Vacancy]:
+    """
+    Получает все вакансии со статусом completed.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :return: Список объектов Vacancy.
+    """
+    return await get_all_completed_vacancies_repository(
+        postgres_session=postgres_session
+    )

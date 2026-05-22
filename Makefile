@@ -91,3 +91,6 @@ sync-vacancy-processing:
 
 sync-resume-processing:
 	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/resume_processing_service --inexact
+
+sync-matching:
+	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/matching_service --inexact

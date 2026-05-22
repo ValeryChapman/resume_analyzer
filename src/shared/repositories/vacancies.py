@@ -149,5 +149,21 @@ async def delete_vacancy_by_id_repository(
         .where(Vacancy.id == vacancy_id, Vacancy.user_id == user_id)
         .returning(Vacancy.id)
     )
-    result: Result = await postgres_session.execute(statement=statement)
+    result: Result = await postgres_session.execute(statement)
     return result.scalar_one_or_none() is not None
+
+
+async def get_all_completed_vacancies_repository(
+    postgres_session: AsyncSession,
+) -> Sequence[Vacancy]:
+    """
+    Получает все вакансии со статусом completed.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :return: Список объектов Vacancy.
+    """
+    statement = select(Vacancy).where(
+        Vacancy.processing_status == VacancyProcessingStatus.completed
+    )
+    result: Result = await postgres_session.execute(statement=statement)
+    return result.scalars().all()

@@ -229,3 +229,48 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  matching_service:
+    profiles: [ "platform" ]
+    restart: "no"
+    build:
+      context: ../../
+      dockerfile: infra/docker/matching_service/Dockerfile
+    command: [ "sh", "-c", "uv run --active --no-sync python -m matching_service.main" ]
+    environment:
+      ## POSTGRES
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT_INTERNAL}
+
+      ## REDIS
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT_INTERNAL}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      ## LLM
+      LLM_NAME: ${LLM_NAME}
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_TIMEOUT: ${LLM_TIMEOUT}
+
+      ## MATCHING SERVICE
+      MATCHING_SERVICE_CONSUMER_GROUP: ${MATCHING_SERVICE_CONSUMER_GROUP}
+      MATCHING_SERVICE_CONSUMER_NAME: ${MATCHING_SERVICE_CONSUMER_NAME}
+      MATCHING_SERVICE_MAX_PARALLEL_TASKS: ${MATCHING_SERVICE_MAX_PARALLEL_TASKS}
+      MATCHING_SERVICE_READ_BLOCK_MS: ${MATCHING_SERVICE_READ_BLOCK_MS}
+      MATCHING_SERVICE_ERROR_SLEEP_SECONDS: ${MATCHING_SERVICE_ERROR_SLEEP_SECONDS}
+      MATCHING_SERVICE_STALE_TASK_IDLE_MS: ${MATCHING_SERVICE_STALE_TASK_IDLE_MS}
+      MATCHING_SERVICE_RECLAIM_BATCH_SIZE: ${MATCHING_SERVICE_RECLAIM_BATCH_SIZE}
+      MATCHING_SERVICE_MAX_DELIVERY_ATTEMPTS: ${MATCHING_SERVICE_MAX_DELIVERY_ATTEMPTS}
+    depends_on:
+      migration_service:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

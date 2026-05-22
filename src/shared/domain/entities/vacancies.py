@@ -1,26 +1,13 @@
-from enum import Enum
-
 from pydantic import BaseModel, Field
 
-
-class SeniorityLevel(str, Enum):
-    JUNIOR = "junior"
-    MIDDLE = "middle"
-    SENIOR = "senior"
-    UNKNOWN = "unknown"
-
-
-class EducationLevel(str, Enum):
-    SECONDARY = "secondary"
-    HIGHER = "higher"
-    UNKNOWN = "unknown"
+from shared.domain.entities.common import EducationLevel, SeniorityLevel
 
 
 class VacancyStructuredData(BaseModel):
     """Модель структурированных данных вакансии, извлеченных из текста."""
 
     title: str = Field(
-        ..., description="Название должности из текста, например Python разработчик."
+        ..., description="Название должности из текста, например, Python разработчик."
     )
     seniority: SeniorityLevel | None = Field(
         default=None, description="Уровень позиции."

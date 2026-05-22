@@ -6,17 +6,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
-WORKDIR /src/vacancy_processing_service
+WORKDIR /src/resume_processing_service
 
 # Устанавливаем uv для управления зависимостями из lock-файла.
 RUN pip install --no-cache-dir uv
 
 # Сначала копируем файлы зависимостей для максимального переиспользования кэша слоёв.
-COPY src/vacancy_processing_service/pyproject.toml src/vacancy_processing_service/uv.lock ./
+COPY src/resume_processing_service/pyproject.toml src/resume_processing_service/uv.lock* ./
 RUN uv sync --frozen --no-dev
 
 # Копируем исходный код приложения.
-COPY src/vacancy_processing_service /src/vacancy_processing_service
+COPY src/resume_processing_service /src/resume_processing_service
 
 # Копируем общий код.
 COPY src/shared/__init__.py /src/shared/__init__.py
@@ -43,11 +43,11 @@ COPY src/shared/infrastructure/llm /src/shared/infrastructure/llm
 ## services
 COPY src/shared/services/__init__.py /src/shared/services/__init__.py
 COPY src/shared/services/redis_streams.py /src/shared/services/redis_streams.py
-COPY src/shared/services/vacancies.py /src/shared/services/vacancies.py
+COPY src/shared/services/resumes.py /src/shared/services/resumes.py
 
 ## repositories
 COPY src/shared/repositories/__init__.py /src/shared/repositories/__init__.py
-COPY src/shared/repositories/vacancies.py /src/shared/repositories/vacancies.py
+COPY src/shared/repositories/resumes.py /src/shared/repositories/resumes.py
 
 ## domain
 COPY src/shared/domain/__init__.py /src/shared/domain/__init__.py
@@ -63,9 +63,10 @@ COPY src/shared/domain/dto/tasks.py /src/shared/domain/dto/tasks.py
 ## domain –> entities
 COPY src/shared/domain/entities/__init__.py /src/shared/domain/entities/__init__.py
 COPY src/shared/domain/entities/common.py /src/shared/domain/entities/common.py
+COPY src/shared/domain/entities/resumes.py /src/shared/domain/entities/resumes.py
 COPY src/shared/domain/entities/vacancies.py /src/shared/domain/entities/vacancies.py
 
 ## domain –> exceptions
 COPY src/shared/domain/exceptions/__init__.py /src/shared/domain/exceptions/__init__.py
 COPY src/shared/domain/exceptions/default.py /src/shared/domain/exceptions/default.py
-COPY src/shared/domain/exceptions/vacancies.py /src/shared/domain/exceptions/vacancies.py
+COPY src/shared/domain/exceptions/resumes.py /src/shared/domain/exceptions/resumes.py

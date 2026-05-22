@@ -13,3 +13,9 @@ class ResumeProcessingTaskSchema(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     resume_id: UUID
+
+
+class MatchingTaskSchema(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    resume_id: UUID | None = None

@@ -184,3 +184,48 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  resume_processing_service:
+    profiles: [ "platform" ]
+    restart: "no"
+    build:
+      context: ../../
+      dockerfile: infra/docker/resume_processing_service/Dockerfile
+    command: [ "sh", "-c", "uv run --active --no-sync python -m resume_processing_service.main" ]
+    environment:
+      ## POSTGRES
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT_INTERNAL}
+
+      ## REDIS
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT_INTERNAL}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      ## LLM
+      LLM_NAME: ${LLM_NAME}
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_TIMEOUT: ${LLM_TIMEOUT}
+
+      ## RESUME PROCESSING SERVICE
+      RESUME_PROCESSING_SERVICE_CONSUMER_GROUP: ${RESUME_PROCESSING_SERVICE_CONSUMER_GROUP}
+      RESUME_PROCESSING_SERVICE_CONSUMER_NAME: ${RESUME_PROCESSING_SERVICE_CONSUMER_NAME}
+      RESUME_PROCESSING_SERVICE_MAX_PARALLEL_TASKS: ${RESUME_PROCESSING_SERVICE_MAX_PARALLEL_TASKS}
+      RESUME_PROCESSING_SERVICE_READ_BLOCK_MS: ${RESUME_PROCESSING_SERVICE_READ_BLOCK_MS}
+      RESUME_PROCESSING_SERVICE_ERROR_SLEEP_SECONDS: ${RESUME_PROCESSING_SERVICE_ERROR_SLEEP_SECONDS}
+      RESUME_PROCESSING_SERVICE_STALE_TASK_IDLE_MS: ${RESUME_PROCESSING_SERVICE_STALE_TASK_IDLE_MS}
+      RESUME_PROCESSING_SERVICE_RECLAIM_BATCH_SIZE: ${RESUME_PROCESSING_SERVICE_RECLAIM_BATCH_SIZE}
+      RESUME_PROCESSING_SERVICE_MAX_DELIVERY_ATTEMPTS: ${RESUME_PROCESSING_SERVICE_MAX_DELIVERY_ATTEMPTS}
+    depends_on:
+      migration_service:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

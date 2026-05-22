@@ -88,3 +88,6 @@ sync-bot:
 
 sync-vacancy-processing:
 	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/vacancy_processing_service --inexact
+
+sync-resume-processing:
+	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/resume_processing_service --inexact

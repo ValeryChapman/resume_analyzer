@@ -147,3 +147,30 @@ async def claim_stale_messages_service(
         count=count,
     )
     return _extract_xautoclaim_messages(response)
+
+
+async def add_message_to_stream_service(
+    redis: aioredis.Redis,
+    stream_name: str,
+    message_data: Mapping[str, str],
+    max_len: int = 10000,
+    approximate: bool = True,
+) -> str:
+    """
+    Добавляет сообщение в Redis Stream.
+
+    :param redis: Асинхронный клиент Redis.
+    :param stream_name: Имя Redis Stream.
+    :param message_data: Данные сообщения.
+    :param max_len: Максимальная длина потока.
+    :param approximate: Использовать ли примерное ограничение длины (~).
+    :return: ID созданного сообщения.
+    """
+    message_id = await redis.xadd(
+        name=stream_name,
+        fields=message_data,
+        maxlen=max_len,
+        approximate=approximate,
+    )
+    logger.info(f"Сообщение {message_id} успешно добавлено в поток {stream_name}")
+    return str(message_id)

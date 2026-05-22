@@ -1,15 +1,23 @@
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.domain.exceptions.resumes import ResumeError, ResumeValidationError
-from shared.infrastructure.postgres.models.resume import Resume
+from shared.domain.exceptions.resumes import (
+    ResumeError,
+    ResumeNotFoundError,
+    ResumeValidationError,
+)
+from shared.infrastructure.postgres.models.resume import Resume, ResumeProcessingStatus
 from shared.repositories.resumes import (
     create_resume_repository,
     get_resume_by_hh_id_repository,
+    get_resume_by_id_repository,
+    update_resume_processing_status_repository,
 )
 
 
 async def create_resume_service(
-    postgres_session: AsyncSession, raw_text: str, hh_id: str | None = None
+    postgres_session: AsyncSession, hh_id: str, raw_text: str
 ) -> Resume:
     """
     Создает новое резюме после базовой валидации текста.
@@ -50,41 +58,57 @@ async def get_resume_by_hh_id_service(
     )
 
 
-async def create_resume_from_hh_service(
-    postgres_session: AsyncSession, hh_id: str, raw_text: str
-) -> tuple[Resume, bool]:
+async def get_resume_by_id_for_processing_service(
+    postgres_session: AsyncSession, resume_id: UUID
+) -> Resume:
     """
-    Создает резюме из hh.ru, если его еще нет в базе.
+    Получает резюме по идентификатору для внутренней обработки сервисами.
 
     :param postgres_session: Асинхронная сессия SQLAlchemy.
-    :param hh_id: Идентификатор резюме на hh.ru.
-    :param raw_text: Исходный текст резюме.
-    :return: Кортеж (объект Resume, было_ли_создано).
+    :param resume_id: Идентификатор резюме.
+    :return: Объект Resume.
     """
-    existing_resume = await get_resume_by_hh_id_service(
+    resume = await get_resume_by_id_repository(
         postgres_session=postgres_session,
-        hh_id=hh_id,
+        resume_id=resume_id,
     )
-    if existing_resume is not None:
-        return existing_resume, False
+    if resume is None:
+        raise ResumeNotFoundError(f"Резюме с идентификатором {resume_id} не найдено")
 
-    normalized_text = raw_text.strip()
-    if not normalized_text:
-        raise ResumeValidationError("Описание резюме не может быть пустым.")
+    return resume
 
-    resume = await create_resume_repository(
+
+async def update_resume_processing_status_service(
+    postgres_session: AsyncSession,
+    resume_id: UUID,
+    processing_status: ResumeProcessingStatus,
+    processed_data: dict | None = None,
+    title: str | None = None,
+    summary: str | None = None,
+    update_processed_data: bool = False,
+) -> Resume:
+    """
+    Обновляет статус обработки резюме.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param resume_id: Идентификатор резюме.
+    :param processing_status: Новый статус обработки резюме.
+    :param processed_data: Данные после обработки.
+    :param title: Извлеченный заголовок резюме.
+    :param summary: Извлеченная краткая сводка резюме.
+    :param update_processed_data: Обновлять ли поле processed_data.
+    :return: Обновленное резюме.
+    """
+    resume = await update_resume_processing_status_repository(
         postgres_session=postgres_session,
-        raw_text=normalized_text,
-        hh_id=hh_id,
+        resume_id=resume_id,
+        processing_status=processing_status,
+        processed_data=processed_data,
+        title=title,
+        summary=summary,
+        update_processed_data=update_processed_data,
     )
-    if resume is not None:
-        return resume, True
+    if resume is None:
+        raise ResumeNotFoundError(f"Резюме с идентификатором {resume_id} не найдено")
 
-    existing_resume = await get_resume_by_hh_id_service(
-        postgres_session=postgres_session,
-        hh_id=hh_id,
-    )
-    if existing_resume is not None:
-        return existing_resume, False
-
-    raise ResumeError("Не удалось сохранить резюме из hh.ru")
+    return resume

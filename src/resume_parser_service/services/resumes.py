@@ -7,7 +7,7 @@ from resume_parser_service.services.api import get_resume_detail_api_service
 from resume_parser_service.services.formatters import format_resume_details_to_text
 from shared.infrastructure.postgres import get_postgres_async_session
 from shared.services.resumes import (
-    create_resume_from_hh_service,
+    create_resume_service,
     get_resume_by_hh_id_service,
 )
 from shared.services.tasks import send_resume_processing_task_service
@@ -64,14 +64,11 @@ async def create_resume_and_enqueue(hh_id: str, raw_text: str) -> bool:
     :return: True, если резюме было создано и отправлено в очередь.
     """
     async with get_postgres_async_session() as postgres_session:
-        resume, created = await create_resume_from_hh_service(
+        resume = await create_resume_service(
             postgres_session=postgres_session,
             hh_id=hh_id,
             raw_text=raw_text,
         )
-        if not created:
-            return False
-
         await postgres_session.commit()
 
     await send_resume_processing_task_service(resume_id=resume.id)

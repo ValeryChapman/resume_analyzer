@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 from pydantic import ValidationError
 
 from matching_service.settings import settings
-from shared.domain.entities.matches import MatchStructuredData
+from shared.domain.entities.match_results import MatchStructuredData
 from shared.infrastructure.llm.client import get_llm_async_client
 
 MATCHING_SYSTEM_PROMPT = """

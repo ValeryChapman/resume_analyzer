@@ -1,11 +1,16 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, Float, ForeignKey, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shared.infrastructure.postgres.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from shared.infrastructure.postgres.models.resume import Resume
+    from shared.infrastructure.postgres.models.vacancy import Vacancy
 
 
 class MatchResult(BaseModel):
@@ -40,6 +45,14 @@ class MatchResult(BaseModel):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+    vacancy: Mapped["Vacancy"] = relationship(
+        "Vacancy",
+        back_populates="match_results",
+    )
+    resume: Mapped["Resume"] = relationship(
+        "Resume",
+        back_populates="match_results",
     )
 
     def __repr__(self) -> str:

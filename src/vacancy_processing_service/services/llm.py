@@ -53,7 +53,6 @@ async def structure_vacancy_text_service(raw_text: str) -> VacancyStructuredData
 
     :param raw_text: Исходный текст вакансии.
     :return: Структурированная вакансия.
-    :raises ValueError: Если ответ модели пустой или невалидный.
     """
     llm_client: AsyncOpenAI = get_llm_async_client()
 

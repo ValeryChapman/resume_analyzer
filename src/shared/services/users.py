@@ -19,7 +19,7 @@ async def create_user_service(
 
     :param postgres_session: Асинхронная сессия SQLAlchemy.
     :param telegram_id: Telegram ID пользователя.
-    :return: Объект User или None.
+    :return: Объект User.
     """
     user = await create_user_repository(
         postgres_session=postgres_session, telegram_id=telegram_id

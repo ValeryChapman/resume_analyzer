@@ -24,7 +24,7 @@ async def create_resume_service(
 
     :param postgres_session: Асинхронная сессия SQLAlchemy.
     :param raw_text: Исходный текст резюме.
-    :param hh_id: Идентификатор резюме на hh.ru.
+    :param hh_id: Идентификатор резюме на HeadHunter.
     :return: Объект Resume.
     """
     normalized_text = raw_text.strip()
@@ -32,9 +32,7 @@ async def create_resume_service(
         raise ResumeValidationError("Описание резюме не может быть пустым.")
 
     resume = await create_resume_repository(
-        postgres_session=postgres_session,
-        raw_text=normalized_text,
-        hh_id=hh_id,
+        postgres_session=postgres_session, raw_text=normalized_text, hh_id=hh_id
     )
     if resume is None:
         raise ResumeError("Не удалось сохранить резюме")
@@ -42,23 +40,7 @@ async def create_resume_service(
     return resume
 
 
-async def get_resume_by_hh_id_service(
-    postgres_session: AsyncSession, hh_id: str
-) -> Resume | None:
-    """
-    Получает резюме по идентификатору hh.ru.
-
-    :param postgres_session: Асинхронная сессия SQLAlchemy.
-    :param hh_id: Идентификатор резюме на hh.ru.
-    :return: Объект Resume или None.
-    """
-    return await get_resume_by_hh_id_repository(
-        postgres_session=postgres_session,
-        hh_id=hh_id,
-    )
-
-
-async def get_resume_by_id_for_processing_service(
+async def get_resume_by_id_service(
     postgres_session: AsyncSession, resume_id: UUID
 ) -> Resume:
     """
@@ -69,11 +51,31 @@ async def get_resume_by_id_for_processing_service(
     :return: Объект Resume.
     """
     resume = await get_resume_by_id_repository(
-        postgres_session=postgres_session,
-        resume_id=resume_id,
+        postgres_session=postgres_session, resume_id=resume_id
     )
     if resume is None:
         raise ResumeNotFoundError(f"Резюме с идентификатором {resume_id} не найдено")
+
+    return resume
+
+
+async def get_resume_by_hh_id_service(
+    postgres_session: AsyncSession, hh_id: str
+) -> Resume:
+    """
+    Получает резюме по идентификатору HeadHunter.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param hh_id: Идентификатор резюме на HeadHunter.
+    :return: Объект Resume или None.
+    """
+    resume = await get_resume_by_hh_id_repository(
+        postgres_session=postgres_session, hh_id=hh_id
+    )
+    if resume is None:
+        raise ResumeNotFoundError(
+            f"Резюме с идентификатором HeadHunter {hh_id} не найдено"
+        )
 
     return resume
 

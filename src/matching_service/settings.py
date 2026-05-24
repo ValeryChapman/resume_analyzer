@@ -115,6 +115,12 @@ class MatchingConfig(BaseSettings):
         alias="MATCHING_SERVICE_MAX_DELIVERY_ATTEMPTS",
         ge=1,
     )
+    notification_threshold: float = Field(
+        75.0,
+        alias="MATCHING_SERVICE_NOTIFICATION_THRESHOLD",
+        ge=0.0,
+        le=100.0,
+    )
 
 
 class ServiceConfig(BaseSettings):

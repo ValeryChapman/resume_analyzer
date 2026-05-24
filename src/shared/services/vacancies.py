@@ -80,10 +80,7 @@ async def get_vacancies_by_user_id_service(
         raise VacancyValidationError("Параметр offset не может быть отрицательным.")
 
     return await get_vacancies_by_user_id_repository(
-        postgres_session=postgres_session,
-        user_id=user_id,
-        limit=limit,
-        offset=offset,
+        postgres_session=postgres_session, user_id=user_id, limit=limit, offset=offset
     )
 
 
@@ -103,9 +100,7 @@ async def get_vacancies_count_by_user_id_service(
 
 
 async def get_vacancy_by_id_service(
-    postgres_session: AsyncSession,
-    vacancy_id: UUID,
-    user_id: UUID,
+    postgres_session: AsyncSession, vacancy_id: UUID, user_id: UUID | None = None
 ) -> Vacancy:
     """
     Получает вакансию по идентификатору.
@@ -116,32 +111,7 @@ async def get_vacancy_by_id_service(
     :return: Объект Vacancy.
     """
     vacancy = await get_vacancy_by_id_repository(
-        postgres_session=postgres_session,
-        vacancy_id=vacancy_id,
-        user_id=user_id,
-    )
-    if vacancy is None:
-        raise VacancyNotFoundError(
-            f"Вакансия с идентификатором {vacancy_id} не найдена"
-        )
-
-    return vacancy
-
-
-async def get_vacancy_by_id_for_processing_service(
-    postgres_session: AsyncSession,
-    vacancy_id: UUID,
-) -> Vacancy:
-    """
-    Получает вакансию по идентификатору для внутренней обработки сервисами.
-
-    :param postgres_session: Асинхронная сессия SQLAlchemy.
-    :param vacancy_id: Идентификатор вакансии.
-    :return: Объект Vacancy.
-    """
-    vacancy = await get_vacancy_by_id_repository(
-        postgres_session=postgres_session,
-        vacancy_id=vacancy_id,
+        postgres_session=postgres_session, vacancy_id=vacancy_id, user_id=user_id
     )
     if vacancy is None:
         raise VacancyNotFoundError(
@@ -200,12 +170,9 @@ async def delete_vacancy_by_id_service(
     :param postgres_session: Асинхронная сессия SQLAlchemy.
     :param vacancy_id: Идентификатор вакансии.
     :param user_id: Идентификатор пользователя-владельца.
-    :raises VacancyNotFoundError: Если вакансия не найдена.
     """
     is_deleted = await delete_vacancy_by_id_repository(
-        postgres_session=postgres_session,
-        vacancy_id=vacancy_id,
-        user_id=user_id,
+        postgres_session=postgres_session, vacancy_id=vacancy_id, user_id=user_id
     )
     if not is_deleted:
         raise VacancyNotFoundError(

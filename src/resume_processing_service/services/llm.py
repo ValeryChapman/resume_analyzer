@@ -54,7 +54,6 @@ async def structure_resume_text_service(raw_text: str) -> ResumeStructuredData:
 
     :param raw_text: Исходный текст резюме.
     :return: Структурированное резюме.
-    :raises ValueError: Если ответ модели пустой или невалидный.
     """
     llm_client: AsyncOpenAI = get_llm_async_client()
 

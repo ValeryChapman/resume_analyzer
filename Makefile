@@ -53,6 +53,9 @@ platform-up:
 platform-start:
 	$(DOCKER_COMPOSE) --profile platform up --build
 
+platform-build:
+	$(DOCKER_COMPOSE) --profile platform build --no-cache
+
 platform-start-d:
 	$(DOCKER_COMPOSE) --profile platform up -d --build
 
@@ -94,3 +97,6 @@ sync-resume-processing:
 
 sync-matching:
 	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/matching_service --inexact
+
+sync-notification:
+	UV_PROJECT_ENVIRONMENT=$(UV_PROJECT_ENVIRONMENT) uv sync --project src/notification_service --inexact

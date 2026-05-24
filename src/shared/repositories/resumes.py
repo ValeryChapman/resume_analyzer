@@ -16,7 +16,7 @@ async def create_resume_repository(
 
     :param postgres_session: Асинхронная сессия SQLAlchemy.
     :param raw_text: Исходный текст резюме.
-    :param hh_id: Идентификатор резюме на hh.ru.
+    :param hh_id: Идентификатор резюме на HeadHunter.
     :return: Объект Resume или None при конфликте уникальности.
     """
     statement = (
@@ -32,21 +32,6 @@ async def create_resume_repository(
     return result.scalar_one_or_none()
 
 
-async def get_resume_by_hh_id_repository(
-    postgres_session: AsyncSession, hh_id: str
-) -> Resume | None:
-    """
-    Получает резюме по идентификатору hh.ru.
-
-    :param postgres_session: Асинхронная сессия SQLAlchemy.
-    :param hh_id: Идентификатор резюме на hh.ru.
-    :return: Объект Resume или None.
-    """
-    statement = select(Resume).where(Resume.hh_id == hh_id)
-    result: Result = await postgres_session.execute(statement=statement)
-    return result.scalar_one_or_none()
-
-
 async def get_resume_by_id_repository(
     postgres_session: AsyncSession, resume_id: UUID
 ) -> Resume | None:
@@ -58,6 +43,21 @@ async def get_resume_by_id_repository(
     :return: Объект Resume или None.
     """
     statement = select(Resume).where(Resume.id == resume_id)
+    result: Result = await postgres_session.execute(statement=statement)
+    return result.scalar_one_or_none()
+
+
+async def get_resume_by_hh_id_repository(
+    postgres_session: AsyncSession, hh_id: str
+) -> Resume | None:
+    """
+    Получает резюме по идентификатору HeadHunter.
+
+    :param postgres_session: Асинхронная сессия SQLAlchemy.
+    :param hh_id: Идентификатор резюме на HeadHunter.
+    :return: Объект Resume или None.
+    """
+    statement = select(Resume).where(Resume.hh_id == hh_id)
     result: Result = await postgres_session.execute(statement=statement)
     return result.scalar_one_or_none()
 

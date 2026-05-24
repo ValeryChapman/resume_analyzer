@@ -18,7 +18,7 @@ from shared.services.redis_streams import (
     get_message_delivery_count_service,
 )
 from shared.services.resumes import (
-    get_resume_by_id_for_processing_service,
+    get_resume_by_id_service,
     update_resume_processing_status_service,
 )
 
@@ -73,7 +73,7 @@ async def _process_resume_task(
         )
 
         async with get_postgres_async_session() as postgres_session:
-            resume = await get_resume_by_id_for_processing_service(
+            resume = await get_resume_by_id_service(
                 postgres_session=postgres_session,
                 resume_id=task.resume_id,
             )

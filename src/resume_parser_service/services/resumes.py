@@ -5,6 +5,7 @@ import httpx
 from resume_parser_service.schemas.get_resume_search import HHResumeSearchItemSchema
 from resume_parser_service.services.api import get_resume_detail_api_service
 from resume_parser_service.services.formatters import format_resume_details_to_text
+from shared.domain.exceptions.resumes import ResumeNotFoundError
 from shared.infrastructure.postgres import get_postgres_async_session
 from shared.services.resumes import (
     create_resume_service,
@@ -27,10 +28,13 @@ async def process_resume_from_hh(resume: HHResumeSearchItemSchema) -> bool:
         return False
 
     async with get_postgres_async_session() as postgres_session:
-        if await get_resume_by_hh_id_service(
-            postgres_session=postgres_session, hh_id=hh_id
-        ):
-            return False
+        try:
+            if await get_resume_by_hh_id_service(
+                postgres_session=postgres_session, hh_id=hh_id
+            ):
+                return False
+        except ResumeNotFoundError:
+            ...
 
     resume_url = resume.url
     if not resume_url:
@@ -40,6 +44,7 @@ async def process_resume_from_hh(resume: HHResumeSearchItemSchema) -> bool:
         resume_detail_response = await get_resume_detail_api_service(
             resume_url=resume_url
         )
+        print(f"resume_detail_response: {resume_detail_response}")
     except httpx.HTTPError as exc:
         logger.warning(
             "Не удалось получить полную версию резюме HeadHunter: hh_id=%s error=%s",
@@ -59,15 +64,13 @@ async def create_resume_and_enqueue(hh_id: str, raw_text: str) -> bool:
     """
     Создает резюме в БД и ставит задачу на последующую обработку.
 
-    :param hh_id: Идентификатор резюме на hh.ru.
+    :param hh_id: Идентификатор резюме на HeadHunter.
     :param raw_text: Исходный текст резюме.
     :return: True, если резюме было создано и отправлено в очередь.
     """
     async with get_postgres_async_session() as postgres_session:
         resume = await create_resume_service(
-            postgres_session=postgres_session,
-            hh_id=hh_id,
-            raw_text=raw_text,
+            postgres_session=postgres_session, hh_id=hh_id, raw_text=raw_text
         )
         await postgres_session.commit()
 

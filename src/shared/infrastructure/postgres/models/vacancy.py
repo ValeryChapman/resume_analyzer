@@ -12,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from shared.infrastructure.postgres.models.base import BaseModel
 
 if TYPE_CHECKING:
+    from shared.infrastructure.postgres.models.match_result import MatchResult
     from shared.infrastructure.postgres.models.user import User
 
 
@@ -55,6 +56,12 @@ class Vacancy(BaseModel):
     )
 
     user: Mapped["User"] = relationship("User", back_populates="vacancies")
+    match_results: Mapped[list["MatchResult"]] = relationship(
+        "MatchResult",
+        back_populates="vacancy",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def __repr__(self):
         return f"<Vacancy(id={self.id}, user_id={self.user_id}, status={self.processing_status})>"

@@ -15,7 +15,7 @@ from shared.services.redis_streams import (
     get_message_delivery_count_service,
 )
 from shared.services.vacancies import (
-    get_vacancy_by_id_for_processing_service,
+    get_vacancy_by_id_service,
     update_vacancy_processing_status_service,
 )
 from vacancy_processing_service.services.llm import structure_vacancy_text_service
@@ -72,7 +72,7 @@ async def _process_vacancy_task(
         )
 
         async with get_postgres_async_session() as postgres_session:
-            vacancy = await get_vacancy_by_id_for_processing_service(
+            vacancy = await get_vacancy_by_id_service(
                 postgres_session=postgres_session,
                 vacancy_id=task.vacancy_id,
             )

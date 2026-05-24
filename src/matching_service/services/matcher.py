@@ -7,14 +7,20 @@ from redis import asyncio as aioredis
 from matching_service.services.llm import calculate_match_score_service
 from matching_service.settings import settings
 from shared.domain.constants.tasks import RedisStreamName
-from shared.domain.dto.tasks import MatchingTaskSchema
+from shared.domain.dto.tasks import (
+    MatchFoundNotificationPayloadSchema,
+    MatchingTaskSchema,
+    NotificationEventType,
+    NotificationTaskSchema,
+)
 from shared.infrastructure.postgres.session import get_postgres_async_session
-from shared.repositories.matches import upsert_match_result_repository
+from shared.services.match_results import upsert_match_result_service
 from shared.services.redis_streams import (
     ack_and_delete_message_service,
+    add_message_to_stream_service,
     get_message_delivery_count_service,
 )
-from shared.services.resumes import get_resume_by_id_for_processing_service
+from shared.services.resumes import get_resume_by_id_service
 from shared.services.vacancies import get_all_completed_vacancies_service
 
 logger = logging.getLogger(__name__)
@@ -57,18 +63,30 @@ async def _process_matching_task(
             )
             return
 
+        if not task.resume_id:
+            logger.error(f"Задача не содержит resume_id: {message_data}")
+            should_ack = True
+            return
+
         logger.info(
             f"Получена задача сопоставления резюме: message_id={message_id} resume_id={task.resume_id}"
         )
 
         async with get_postgres_async_session() as postgres_session:
-            resume = await get_resume_by_id_for_processing_service(
+            resume = await get_resume_by_id_service(
                 postgres_session=postgres_session,
                 resume_id=task.resume_id,
             )
             vacancies = await get_all_completed_vacancies_service(
                 postgres_session=postgres_session
             )
+
+        if not vacancies:
+            logger.info(
+                "Нет подходящих вакансий (со статусом completed) для сопоставления."
+            )
+            should_ack = True
+            return
 
         for vacancy in vacancies:
             try:
@@ -77,13 +95,13 @@ async def _process_matching_task(
                 )
                 match_data = await calculate_match_score_service(
                     vacancy_text=vacancy.raw_text,
-                    vacancy_structured=vacancy.processed_data,
+                    vacancy_structured=vacancy.processed_data or {},
                     resume_text=resume.raw_text,
-                    resume_structured=resume.processed_data,
+                    resume_structured=resume.processed_data or {},
                 )
 
                 async with get_postgres_async_session() as postgres_session:
-                    await upsert_match_result_repository(
+                    match_result = await upsert_match_result_service(
                         postgres_session=postgres_session,
                         vacancy_id=vacancy.id,
                         resume_id=resume.id,
@@ -91,15 +109,31 @@ async def _process_matching_task(
                         reasoning=match_data.reasoning,
                     )
 
-                # if match_data.score >= settings.matching.notification_threshold:
-                #     ...
+                # Отправляем событие в Notification Service
+                if match_data.score >= settings.matching.notification_threshold:
+                    logger.info(
+                        f"Оценка {match_data.score} выше порога, отправляем уведомление."
+                    )
+                    notification_task = NotificationTaskSchema(
+                        event_type=NotificationEventType.MATCH_FOUND,
+                        payload=MatchFoundNotificationPayloadSchema(
+                            match_result_id=match_result.id,
+                        ),
+                    )
+                    await add_message_to_stream_service(
+                        redis=redis,
+                        stream_name=RedisStreamName.NOTIFICATIONS,
+                        message_data={
+                            "event_type": notification_task.event_type.value,
+                            "payload": notification_task.payload.model_dump_json(),
+                        },
+                    )
 
             except Exception as exc:
                 logger.error(
                     f"Ошибка сопоставления резюме {resume.id} с вакансией {vacancy.id}: {exc}",
                     exc_info=True,
                 )
-                # Продолжаем сопоставление с остальными вакансиями
 
         should_ack = True
     except ValidationError as exc:

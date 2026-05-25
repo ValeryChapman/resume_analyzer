@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot_service.common.telegram.callbacks import Callbacks, VacanciesCallback
 from bot_service.common.telegram.texts.buttons import ButtonText
+from shared.infrastructure.telegram_bot.callbacks import Callbacks, VacanciesCallback
 
 
 def start_menu_keyboard() -> InlineKeyboardMarkup:

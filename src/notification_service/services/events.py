@@ -6,6 +6,8 @@ from aiogram.enums import ParseMode
 
 from shared.infrastructure.postgres.session import get_postgres_async_session
 from shared.infrastructure.telegram_bot.client import get_telegram_bot_client
+from shared.infrastructure.telegram_bot.keyboards import match_found_keyboard
+from shared.infrastructure.telegram_bot.messages import match_result_details_message
 from shared.services.match_results import get_match_result_by_id_service
 
 logger = logging.getLogger(__name__)
@@ -28,28 +30,16 @@ async def process_match_found_event(match_result_id: UUID) -> None:
             return
 
         vacancy = match_result.vacancy
-        resume = match_result.resume
         user = vacancy.user
 
-    # Формируем сообщение
-    resume_url = (
-        f"https://hh.ru/resume/{resume.hh_id}" if resume.hh_id else "Ссылка отсутствует"
-    )
-    message_text = (
-        f"🔥 <b>Найден подходящий кандидат!</b>\n\n"
-        f"<b>Вакансия:</b> {vacancy.title or 'Без названия'}\n"
-        f"<b>Оценка соответствия:</b> {int(match_result.score)}%\n\n"
-        f"<b>Краткая сводка:</b> \n<blockquote>{resume.summary or 'Информация отсутствует'}</blockquote>\n\n"
-        f"<b>Обоснование:</b> \n<blockquote expandable>{match_result.reasoning}</blockquote>\n\n"
-        f'<a href="{resume_url}">Открыть резюме на HeadHunter</a>'
-    )
-
     bot: Bot = await get_telegram_bot_client()
+
     try:
         await bot.send_message(
             chat_id=user.telegram_id,
-            text=message_text,
+            text=match_result_details_message(match_result=match_result),
             parse_mode=ParseMode.HTML,
+            reply_markup=match_found_keyboard(vacancy_id=vacancy.id),
             disable_web_page_preview=True,
         )
         logger.info(f"Уведомление успешно отправлено пользователю {user.telegram_id}")

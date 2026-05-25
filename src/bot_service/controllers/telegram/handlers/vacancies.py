@@ -6,12 +6,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot_service.common.telegram.callbacks import (
-    Callbacks,
-    VacanciesCallback,
-    VacancyCallback,
-    VacancyDeleteCallback,
-)
 from bot_service.common.telegram.keyboards.vacancies import (
     add_vacancy_keyboard,
     vacancies_list_pagination_keyboard,
@@ -37,6 +31,12 @@ from shared.domain.exceptions.vacancies import (
 )
 from shared.infrastructure.postgres.models.user import User
 from shared.infrastructure.postgres.models.vacancy import Vacancy
+from shared.infrastructure.telegram_bot.callbacks import (
+    Callbacks,
+    VacanciesCallback,
+    VacancyCallback,
+    VacancyDeleteCallback,
+)
 from shared.services.tasks import send_vacancy_processing_task_service
 from shared.services.vacancies import (
     create_vacancy_service,

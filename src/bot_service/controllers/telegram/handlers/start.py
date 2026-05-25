@@ -3,10 +3,10 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from bot_service.common.telegram.callbacks import Callbacks
 from bot_service.common.telegram.keyboards.start import start_menu_keyboard
 from bot_service.common.telegram.texts.messages.start import start_message
 from bot_service.settings import settings
+from shared.infrastructure.telegram_bot.callbacks import Callbacks
 
 router = Router(name="start_handlers_router")
 

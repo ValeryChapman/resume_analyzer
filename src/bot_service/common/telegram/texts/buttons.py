@@ -1,12 +1,3 @@
-from enum import StrEnum
+from shared.infrastructure.telegram_bot.buttons import ButtonText
 
-
-class ButtonText(StrEnum):
-    BACK = "Назад"
-    START = "Главное меню"
-
-    ADD_VACANCY = "Добавить вакансию"
-    DELETE_VACANCY = "🗑 Удалить вакансию"
-    GET_VACANCIES = "📄 Мои вакансии"
-    PAGINATION_BACK = "<––"
-    PAGINATION_NEXT = "––>"
+__all__ = ["ButtonText"]

@@ -45,12 +45,14 @@ COPY src/shared/services/__init__.py /src/shared/services/__init__.py
 COPY src/shared/services/users.py /src/shared/services/users.py
 COPY src/shared/services/vacancies.py /src/shared/services/vacancies.py
 COPY src/shared/services/tasks.py /src/shared/services/tasks.py
+COPY src/shared/services/match_results.py /src/shared/services/match_results.py
 
 ## repositories
 COPY src/shared/repositories/__init__.py /src/shared/repositories/__init__.py
 COPY src/shared/repositories/users.py /src/shared/repositories/users.py
 COPY src/shared/repositories/vacancies.py /src/shared/repositories/vacancies.py
 COPY src/shared/repositories/tasks.py /src/shared/repositories/tasks.py
+COPY src/shared/repositories/match_results.py /src/shared/repositories/match_results.py
 
 ## domain
 COPY src/shared/domain/__init__.py /src/shared/domain/__init__.py
@@ -68,3 +70,4 @@ COPY src/shared/domain/exceptions/__init__.py /src/shared/domain/exceptions/__in
 COPY src/shared/domain/exceptions/default.py /src/shared/domain/exceptions/default.py
 COPY src/shared/domain/exceptions/users.py /src/shared/domain/exceptions/users.py
 COPY src/shared/domain/exceptions/vacancies.py /src/shared/domain/exceptions/vacancies.py
+COPY src/shared/domain/exceptions/match_results.py /src/shared/domain/exceptions/match_results.py

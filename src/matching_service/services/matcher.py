@@ -100,19 +100,24 @@ async def _process_matching_task(
                     resume_structured=resume.processed_data or {},
                 )
 
+                is_suitable = (
+                    match_data.score >= settings.matching.notification_threshold
+                )
+
                 async with get_postgres_async_session() as postgres_session:
                     match_result = await upsert_match_result_service(
                         postgres_session=postgres_session,
                         vacancy_id=vacancy.id,
                         resume_id=resume.id,
                         score=match_data.score,
+                        is_suitable=is_suitable,
                         reasoning=match_data.reasoning,
                     )
 
-                # Отправляем событие в Notification Service
-                if match_data.score >= settings.matching.notification_threshold:
+                # Отправляем событие в Notification Service, если кандидат подходит
+                if is_suitable:
                     logger.info(
-                        f"Оценка {match_data.score} выше порога, отправляем уведомление."
+                        f"Кандидат подходит (score={match_data.score}), отправляем уведомление."
                     )
                     notification_task = NotificationTaskSchema(
                         event_type=NotificationEventType.MATCH_FOUND,

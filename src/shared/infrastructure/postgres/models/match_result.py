@@ -2,7 +2,15 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Float, ForeignKey, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -36,6 +44,7 @@ class MatchResult(BaseModel):
         nullable=False,
     )
     score: Mapped[float] = mapped_column(Float, nullable=False)
+    is_suitable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     reasoning: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

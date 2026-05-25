@@ -16,13 +16,13 @@ DOCKER_COMPOSE_PROD=docker compose -f $(DOCKER_COMPOSE_PROD_PATH) --env-file $(E
 	migrate-up migrate-down migrate-revision \
 	sync-migration sync-bot sync-vacancy-processing
 
-build: build-infra
+build: build-infra platform-build
 
 build-infra:
 	$(DOCKER_COMPOSE) --profile infra build --no-cache
 
-build-platform:
-	$(DOCKER_COMPOSE) --profile app build --no-cache
+platform-build:
+	$(DOCKER_COMPOSE) --profile platform build --no-cache
 
 prod-build:
 	$(DOCKER_COMPOSE_PROD) build --no-cache
